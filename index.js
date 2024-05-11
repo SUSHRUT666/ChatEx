@@ -16,4 +16,7 @@ app.use(express.static(path.resolve(__dirname, "public")));
 app.get("/", (req, res) => {
     res.sendFile(path.resolve(__dirname, "public", "index.html"));
 });
-server.listen(9000, () => console.log("Server started at PORT: 9000"));
+
+// Use process.env.PORT for port number
+const PORT = process.env.PORT || 9000;
+server.listen(PORT, () => console.log(`Server started at PORT: ${PORT}`));
