@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatEx</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f1e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 400px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #messages {
+            display: flex; /* Added */
+            flex-direction: column; /* Added */
+            gap: 10px; /* Added */
+            overflow-y: auto; /* Changed */
+            max-height: 250px; /* Changed */
+        }
+
+        .message {
+            display: inline-block; /* Added */
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            word-wrap: break-word;
+        }
+
+        .sent {
+            background-color: #94479b;
+            color: white;
+            align-self: flex-end; /* Added */
+        }
+
+        .received {
+            background-color: #f1f1f1;
+            color: #333;
+            align-self: flex-start; /* Added */
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #955caf;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ChatEx</h1>
+
+        <div id="messages"></div>
+
+        <div class="input-container">
+            <input type="text" id="message" placeholder="Enter Message"/>
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const sendBtn = document.getElementById("sendBtn");
+        const messageInput = document.getElementById("message");
+        const allMessages = document.getElementById("messages");
+
+        // Unique identifier for the user
+        const userId = Math.random().toString(36).substr(2, 9);
+
+        socket.on("message", (data) => {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = data.message;
+            messageDiv.classList.add('message');
+            if (data.userId === userId) {
+                messageDiv.classList.add('sent');
+            } else {
+                messageDiv.classList.add('received');
+            }
+            allMessages.appendChild(messageDiv);
+            allMessages.scrollTop = allMessages.scrollHeight; // Scroll to bottom
+        });
+
+        sendBtn.addEventListener("click", () => {
+            const message = messageInput.value.trim();
+            if (message !== "") {
+                socket.emit('user-message', { message, userId });
+                messageInput.value = ""; // Clear input
+            }
+        });
+
+        messageInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                sendBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
